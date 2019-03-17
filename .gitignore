@@ -1,0 +1,16 @@
+
+/docker-for-development/php7-fpm/.ssh
+
+docker-for-development/data/another-site-db/
+
+docker-for-development/data/elasticsearch/
+
+docker-for-development/data/logs/
+
+docker-for-development/data/lb-talk-db/
+
+docker-for-development/php7\.2-fpm/\.ssh/id_rsa
+
+docker-for-development/php7\.2-fpm/\.ssh/id_rsa\.pub
+
+docker-for-development/php7\.2-fpm/\.ssh/known_hosts

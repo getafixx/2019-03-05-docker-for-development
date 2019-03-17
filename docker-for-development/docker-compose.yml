@@ -1,0 +1,123 @@
+version: '3'
+services:
+    lb-talk-phpserver:
+        container_name: lb-talk-phpserver
+        build: php7.2-fpm
+        ports:
+            - 127.0.0.1:9000:9000
+        networks:
+            - appnet
+        links:
+            - lb-talk-db:mysqldb
+        volumes:
+            - ./../laravelberlin.de:/var/www/laravelberlin.de
+            - ./../another-site.com:/var/www/another-site.local
+            - ./data/logs/nginx/:/var/log/nginx
+            - ./:/var/www/docker
+        depends_on:
+            - lb-talk-db
+
+    lb-talk-nginx:
+        container_name: lb-talk-nginx
+        build: nginx
+        ports:
+            - 127.0.0.1:80:80
+        networks:
+            appnet:
+        links:
+            - lb-talk-phpserver
+        depends_on:
+            - lb-talk-db
+        volumes:
+            - ./../laravelberlin.de:/var/www/laravelberlin.de
+            - ./../another-site.com:/var/www/another-site.local
+            - ./data/logs/nginx/:/var/log/nginx
+
+    lb-talk-db:
+        container_name: lb-talk-db
+        build: mysql-5.6.37
+        ports:
+            - 127.0.0.1:3352:3306
+        networks:
+            - appnet
+        volumes:
+            - ./data/lb-talk-db:/var/lib/mysql
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+            MYSQL_DATABASE: lb-talk-db
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: secret 
+
+    another-site-db:
+        container_name: another-site-db
+        build: mysql-5.6.37
+        ports:
+            - 127.0.0.1:3353:3306
+        networks:
+            - appnet
+        volumes:
+            - ./data/another-site-db:/var/lib/mysql
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+            MYSQL_DATABASE: another-site-db
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: secret
+
+#   lb-talk-redisserver:
+#       container_name: lb-talk-redisserver
+#       image: redis:5.0.3
+#       restart: always
+#       ports:
+#           - 127.0.0.1:6380:6379
+#       networks:
+#           - appnet
+
+#   lb-talk-redis-commander:
+#       container_name: lb-talk-redis-commander
+#       image: tenstartups/redis-commander
+#       command: --redis-host redisserver
+#       networks:
+#           - appnet
+#       links:
+#           - lb-talk-redisserver
+#                              
+#   lb-talk-elasticsearch:
+#       container_name: lb-talk-elasticsearch
+#       image: elasticsearch:5.6.15-alpine
+#       restart: always
+#       volumes:
+#           - ./data/elasticsearch:/usr/share/elasticsearch/data
+#           #- ./conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+#       ports:
+#           - 9200:9200
+#       networks:
+#           - appnet
+
+#   lb-talk-elasticsearch-hq:
+#       container_name: lb-talk-elasticsearch-hq
+#       image: elastichq/elasticsearch-hq
+#       restart: always
+#       links:
+#           - lb-talk-elasticsearch
+#       networks:
+#           - appnet
+
+#   lb-talk-beanstalkd:
+#       container_name: lb-talk-beanstalkd
+#       image: schickling/beanstalkd
+#       restart: always
+#       networks:
+#           - appnet
+
+#   lb-talk-beanstalkd-console:
+#       container_name: lb-talk-beanstalkd-console
+#       image: schickling/beanstalkd-console
+#       restart: always
+#       links:
+#           - lb-talk-beanstalkd
+#       networks:
+#           - appnet
+
+networks:
+    appnet:
+        driver: "bridge"
